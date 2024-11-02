@@ -11,19 +11,24 @@ from collections import defaultdict
 import os
 import aiohttp
 from typing import Optional, Dict, Any
+import concurrent.futures
+import subprocess
+from functools import partial
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='/', intents=intents)
 
 departments = defaultdict(list)
 course_descriptions = {}
 
 professor_cache = {}
 rate_limit_lock=asyncio.Semaphore(1)
+OWNER_ID = ""
+THREAD_COUNT=6
 
 @bot.event
 async def on_ready():
@@ -32,55 +37,55 @@ async def on_ready():
     load_course_data()
     logger.info(f'Loaded {len(departments)} departments: {sorted(departments.keys())}')
 
+def process_course_batch(batch):
+    results = {}
+    for course in batch:
+        match = re.search(r'\[([A-Z]+)\s*(\d+)', course['course_name'])
+        if match:
+            dept, number = match.groups()
+            dept = dept.strip()
+            number = number.strip()
+            course_code = f"{dept} {number}"
+            results[course_code] = {
+                'name': course['course_name'].split('[')[0].strip(),
+                'description': course['description'],
+                'sections': course['sections']
+            }
+    return results
+
+
 def load_course_data():
-    """Load and organize course data from sfu_courses.json"""
     try:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         file_path = os.path.join(script_dir, 'sfu_courses.json')
         
         with open(file_path, 'r', encoding='utf-8') as f:
             courses = json.load(f)
-            
-        for course in courses:
-            # Use a more flexible regex pattern
-            match = re.search(r'\[([A-Z]+)\s*(\d+)', course['course_name'])
-            if match:
-                dept, number = match.groups()
-                dept = dept.strip()
-                number = number.strip()
-                course_code = f"{dept} {number}"
-                
-                # Store in departments dictionary
-                departments[dept].append(course_code)
-                
-                # Store full course info
-                course_descriptions[course_code] = {
-                    'name': course['course_name'].split('[')[0].strip(),
-                    'description': course['description'],
-                    'sections': course['sections']
-                }
         
-        # Debug logging
+        # Split courses into batches for threading
+        batch_size = len(courses) // THREAD_COUNT + 1
+        batches = [courses[i:i + batch_size] for i in range(0, len(courses), batch_size)]
+        
+        # Process batches using ThreadPoolExecutor
+        with concurrent.futures.ThreadPoolExecutor(max_workers=THREAD_COUNT) as executor:
+            results = list(executor.map(process_course_batch, batches))
+        
+        # Combine results
+        departments.clear()
+        course_descriptions.clear()
+        
+        for result in results:
+            for course_code, info in result.items():
+                dept = course_code.split()[0]
+                departments[dept].append(course_code)
+                course_descriptions[course_code] = info
+        
         logger.info(f"Loaded {len(departments)} departments")
         logger.info(f"Loaded {len(course_descriptions)} courses")
         
-        # Additional debug information
-        if len(departments) == 0:
-            logger.error(f"Current working directory: {os.getcwd()}")
-            logger.error(f"Attempting to load from: {file_path}")
-            logger.error(f"File exists: {os.path.exists(file_path)}")
-            if os.path.exists(file_path):
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    first_line = f.readline()
-                    logger.error(f"First line of file: {first_line}")
-                
-    except FileNotFoundError:
-        logger.error(f"sfu_courses.json not found in {os.getcwd()}")
-    except json.JSONDecodeError as e:
-        logger.error(f"JSON parsing error: {str(e)}")
     except Exception as e:
         logger.error(f"Error loading course data: {str(e)}")
-        logger.error(f"Current working directory: {os.getcwd()}")
+
 
 def get_professor_rating(school, professor_name):
     if not professor_name:
@@ -91,7 +96,7 @@ def get_professor_rating(school, professor_name):
             'num_ratings': 'N/A'
         }
     
-    asyncio.sleep(1)  # Rate limiting
+    asyncio.sleep(1)
     try:
         prof = ratemyprofessor.get_professor_by_school_and_name(school, professor_name)
         
@@ -254,6 +259,119 @@ async def get_professor_rating(professor_name: str) -> dict:
             }
             return error_rating
 
+@bot.command(name='dispdept')
+async def display_department(ctx):
+    await display_departments(ctx)
+    
+    try:
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+        
+        dept_msg = await bot.wait_for('message', timeout=60.0, check=check)
+        dept = dept_msg.content.upper().strip()
+        
+        if dept not in departments:
+            await ctx.send(f"Department '{dept}' not found. Please try again with a valid department code.")
+            return
+        
+        courses = sorted(departments[dept])
+        
+        # Process courses in parallel
+        async def process_course(course_code):
+            if course_code in course_descriptions:
+                course_info = course_descriptions[course_code]
+                stats = get_course_digger_info(course_code)
+                
+                embed = discord.Embed(
+                    title=f"{course_code} - {course_info['name']}",
+                    description=course_info['description'] or "No description available",
+                    color=discord.Color.blue()
+                )
+                
+                embed.add_field(name="Median Grade", value=stats['median_grade'], inline=True)
+                embed.add_field(name="Fail Percentage", value=stats['fail_percentage'], inline=True)
+                
+                if course_info['sections']:
+                    for section in course_info['sections']:
+                        prof_rating = await get_professor_rating(section['instructor'])
+                        section_text = (
+                            f"**Section {section['section']}**\n"
+                            f"Instructor: {section['instructor']}\n"
+                            f"Time: {section['day/time']}\n"
+                            f"Location: {section['location']}\n"
+                            f"\nProfessor Ratings:\n"
+                            f"• Rating: {prof_rating['rating']}\n"
+                            f"• Difficulty: {prof_rating['difficulty']}\n"
+                            f"• Would Take Again: {prof_rating['would_take_again']}\n"
+                            f"• Number of Ratings: {prof_rating['num_ratings']}\n"
+                        )
+                        embed.add_field(name=f"Section Information", value=section_text, inline=False)
+                
+                return embed
+            return None
+        
+        # Process courses in batches to avoid rate limits
+        batch_size = 5
+        for i in range(0, len(courses), batch_size):
+            batch = courses[i:i + batch_size]
+            tasks = [process_course(course) for course in batch]
+            embeds = await asyncio.gather(*tasks)
+            
+            for embed in embeds:
+                if embed:
+                    await ctx.send(embed=embed)
+                    await asyncio.sleep(1)  # Prevent rate limiting
+        
+    except asyncio.TimeoutError:
+        await ctx.send("Selection timed out. Please try again with !dispdept")
+    except Exception as e:
+        logger.error(f"Error in display_department: {str(e)}")
+        await ctx.send("An error occurred while processing your request.")
+
+@bot.command(name='update')
+async def update_courses(ctx):
+    global OWNER_ID
+    OWNER_ID=""
+
+    if OWNER_ID=="":
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+
+        await ctx.send("Please provide the bot owner's ID.")
+        owner_msg = await bot.wait_for('message', timeout=60.0, check=check)
+        OWNER_ID = owner_msg.content
+    
+    if str(ctx.author) != OWNER_ID:
+        await ctx.send("Sorry, only the bot owner can use this command.")
+        return
+    
+    try:
+        await ctx.send("Starting course data update...")
+        
+        # Run CoursetoJSON.py
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        script_path = os.path.join(script_dir, 'CoursetoJSON.py')
+        
+        process = await asyncio.create_subprocess_python(
+            script_path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        
+        stdout, stderr = await process.communicate()
+        
+        if process.returncode == 0:
+            # Reload course data
+            load_course_data()
+            await ctx.send("Course data updated successfully!")
+        else:
+            error_msg = stderr.decode() if stderr else "Unknown error"
+            await ctx.send(f"Error updating course data: {error_msg}")
+            
+    except Exception as e:
+        logger.error(f"Error in update_courses: {str(e)}")
+        await ctx.send(f"An error occurred while updating course data: {str(e)}")
+
 @bot.command(name='courses')
 async def courses(ctx):
     """Interactive course selection command"""
@@ -322,7 +440,7 @@ async def help_command(ctx):
     help_text = """
 **Course Information Bot Commands**
 
-`!courses`
+`/courses`
 Interactive course selection:
 1. View list of departments
 2. Enter department code (e.g., "ACMA")
@@ -337,9 +455,18 @@ Interactive course selection:
      - Day/Time
      - Location
 
+`/dispdept`
+Display all available departments. Follow the prompt to select a department.
+
+`/update`
+Update the course data. Only the bot owner can use this command. You will be prompted to provide the owner's ID if not set.
+
+`/course_help`
+Display this help message with information on how to use the bot commands.
+
 Example interaction:
 ```
-!courses
+/courses
 > [Bot shows department list]
 ACMA
 > [Bot shows ACMA courses]
