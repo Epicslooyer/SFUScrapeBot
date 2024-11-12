@@ -334,7 +334,7 @@ async def display_department(ctx):
 
 @bot.command(name='update')
 async def update_courses(ctx):
-    if ((ctx.message.author.id != "333711357260070914") and (ctx.message.type=="APPLICATION_COMMAND") and (ctx.message.interaction.commandName=="update")):
+    if ((ctx.message.author.id != "placeholder") and (ctx.message.type=="APPLICATION_COMMAND") and (ctx.message.interaction.commandName=="update")):
         await ctx.send("Sorry, only the bot owner can use this command.")
         return
     
