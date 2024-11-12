@@ -14,6 +14,12 @@ from typing import Optional, Dict, Any
 import concurrent.futures
 import subprocess
 from functools import partial
+import google.generativeai as ga
+
+GeminiAIKey = ""
+ModelName= "gemini-1.5-flash"
+ga.configure(api_key=GeminiAIKey)
+model=ga.GenerativeModel(ModelName)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,10 +38,10 @@ THREAD_COUNT=6
 
 @bot.event
 async def on_ready():
-    """Load course data and initialize RateMyProfCache when bot starts"""
     logger.info(f'{bot.user} has connected to Discord!')
     load_course_data()
     logger.info(f'Loaded {len(departments)} departments: {sorted(departments.keys())}')
+
 
 def process_course_batch(batch):
     results = {}
@@ -57,16 +63,14 @@ def process_course_batch(batch):
 def load_course_data():
     try:
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(script_dir, 'sfu_courses.json')
+        file_path = os.path.join(script_dir, 'sfu_courses2.json')
         
         with open(file_path, 'r', encoding='utf-8') as f:
             courses = json.load(f)
         
-        # Split courses into batches for threading
         batch_size = len(courses) // THREAD_COUNT + 1
         batches = [courses[i:i + batch_size] for i in range(0, len(courses), batch_size)]
         
-        # Process batches using ThreadPoolExecutor
         with concurrent.futures.ThreadPoolExecutor(max_workers=THREAD_COUNT) as executor:
             results = list(executor.map(process_course_batch, batches))
         
@@ -320,7 +324,7 @@ async def display_department(ctx):
             for embed in embeds:
                 if embed:
                     await ctx.send(embed=embed)
-                    await asyncio.sleep(1)  # Prevent rate limiting
+                    await asyncio.sleep(1)
         
     except asyncio.TimeoutError:
         await ctx.send("Selection timed out. Please try again with !dispdept")
@@ -330,38 +334,28 @@ async def display_department(ctx):
 
 @bot.command(name='update')
 async def update_courses(ctx):
-    global OWNER_ID
-    OWNER_ID=""
-
-    if OWNER_ID=="":
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel
-
-        await ctx.send("Please provide the bot owner's ID.")
-        owner_msg = await bot.wait_for('message', timeout=60.0, check=check)
-        OWNER_ID = owner_msg.content
-    
-    if str(ctx.author) != OWNER_ID:
+    if ((ctx.message.author.id != "333711357260070914") and (ctx.message.type=="APPLICATION_COMMAND") and (ctx.message.interaction.commandName=="update")):
         await ctx.send("Sorry, only the bot owner can use this command.")
         return
     
     try:
         await ctx.send("Starting course data update...")
         
-        # Run CoursetoJSON.py
         script_dir = os.path.dirname(os.path.abspath(__file__))
         script_path = os.path.join(script_dir, 'CoursetoJSON.py')
+        python_executable = sys.executable
+
         
-        process = await asyncio.create_subprocess_python(
+        process = await asyncio.create_subprocess_exec(
+            python_executable,
             script_path,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        
+
         stdout, stderr = await process.communicate()
         
         if process.returncode == 0:
-            # Reload course data
             load_course_data()
             await ctx.send("Course data updated successfully!")
         else:
@@ -475,7 +469,7 @@ ACMA 101
 ```
 """
     embed = discord.Embed(
-        title="Janice-Bot 2.0",
+        title="SFUCourseBot",
         description=help_text,
         color=discord.Color.blue()
     )
@@ -489,4 +483,4 @@ async def on_ready():
 
 
 if __name__ == "__main__":
-    bot.run('MTMwMDIzNDQyMzk4NzM0MzM4MA.GG_quz.x_q1W1jkK_x8idRQ9TBK9v3IXzVrjcgE6GedLk') 
+    bot.run('') 

@@ -116,7 +116,7 @@ def get_course_details(course_url):
         if sections_div:
             table = sections_div.find('table')
             if table:
-                rows = table.find_all('tr')[1:]  # Skip header row
+                rows = table.find_all('tr')[1:]
                 for row in rows:
                     cells = row.find_all('td')
                     if len(cells) >= 4:
@@ -139,23 +139,21 @@ def get_course_details(course_url):
         return None
 
 def scrape_sfu_courses():
-    #If using in a different semester, replace "2025" with the desired year and corresponding semester, SHOLD WORK
+    #If using in a different semester, replace "2025" with the desired year and corresponding semester, SHOULD WORK
     base_url = "https://www.sfu.ca/students/calendar/2025/spring/courses.html"
     all_courses = []
     
     try:
         # Load existing data if any
         try:
-            with open('sfu_courses.json', 'r', encoding='utf-8') as f:
+            with open('sfu_courses2.json', 'r', encoding='utf-8') as f:
                 all_courses = json.load(f)
             logger.info(f"Loaded {len(all_courses)} existing courses from file")
         except FileNotFoundError:
             logger.info("No existing courses file found, starting fresh")
 
-        # Get all department links
         department_links = get_department_links(base_url)
         
-        # Process each department
         for department_url in department_links:
             logger.info(f"Processing department: {department_url}")
             time.sleep(1)  # Polite delay between requests
@@ -180,13 +178,13 @@ def scrape_sfu_courses():
                     
                     # Save progress periodically (every 10 courses)
                     if len(all_courses) % 10 == 0:
-                        with open('sfu_courses.json', 'w', encoding='utf-8') as f:
+                        with open('sfu_courses2.json', 'w', encoding='utf-8') as f:
                             json.dump(all_courses, f, indent=2, ensure_ascii=False)
                 else:
                     logger.warning(f"Skipped course {course_url} due to missing details")
 
         # Final save
-        with open('sfu_courses.json', 'w', encoding='utf-8') as f:
+        with open('sfu_courses2.json', 'w', encoding='utf-8') as f:
             json.dump(all_courses, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Scraping complete. Total courses collected: {len(all_courses)}")
@@ -196,7 +194,7 @@ def scrape_sfu_courses():
         logger.error(f"Script failed with error: {str(e)}")
         # Save whatever we have so far
         if all_courses:
-            with open('sfu_courses.json', 'w', encoding='utf-8') as f:
+            with open('sfu_courses2.json', 'w', encoding='utf-8') as f:
                 json.dump(all_courses, f, indent=2, ensure_ascii=False)
         return all_courses
 

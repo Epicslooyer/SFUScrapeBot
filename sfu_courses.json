@@ -55234,5 +55234,137 @@
     "course_name": "Interdisciplinary Approaches to World Literature [WL\n\t\t320\n\t\t\n\t\t\t(4)]",
     "description": "Intermediate seminar on the intersections between World Literature and other modes of cultural expression, or other academic disciplines. May focus on different methodological approaches to World Literature, for instance gender, cultural, or performance studies. Alternatively, may explore literature in relation to music, theatre, film, the visual arts, or digital humanities. This course may be repeated for credit when different topics are offered. Prerequisite: 45 units. Breadth-Humanities.",
     "sections": []
+  },
+  {
+    "course_name": "Actuarial Science: Selected Topics [ACMA\n\t\t850\n\t\t\n\t\t\t(4)]",
+    "description": "",
+    "sections": []
+  },
+  {
+    "course_name": "Selected Topics in Actuarial Science [ACMA\n\t\t490\n\t\t\n\t\t\t(3)]",
+    "description": "The topics included in this course will vary from term to term depending on faculty availability and student interest. Prerequisite: Dependent on the topic covered.",
+    "sections": []
+  },
+  {
+    "course_name": "Introduction to Insurance [ACMA\n\t\t101\n\t\t\n\t\t\t(3)]",
+    "description": "General overview of universally useful concepts in insurance, pensions and financial management. Typical life, health and property & casualty insurance products; underwriting; pricing; reserving; regulation; social insurance; retirement plans and annuities; financial planning: mortgages, loans, wealth management. Corequisite: MATH 150, 151, 154 or 157. Quantitative/Breadth-Science.",
+    "sections": [
+      {
+        "section": "D100",
+        "instructor": "Cherie Ng",
+        "day/time": "Jan 6 – Apr 9, 2025: Tue, 10:30 a.m.–12:20 p.m.\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\tJan 6 – Apr 9, 2025: Fri, 10:30–11:20 a.m.",
+        "location": "BurnabyBurnaby"
+      },
+      {
+        "section": "D101",
+        "instructor": "Cherie Ng",
+        "day/time": "Jan 6 – Apr 9, 2025: Fri, 11:30 a.m.–12:20 p.m.",
+        "location": "Burnaby"
+      },
+      {
+        "section": "D102",
+        "instructor": "Cherie Ng",
+        "day/time": "Jan 6 – Apr 9, 2025: Fri, 12:30–1:20 p.m.",
+        "location": "Burnaby"
+      },
+      {
+        "section": "D103",
+        "instructor": "Cherie Ng",
+        "day/time": "Jan 6 – Apr 9, 2025: Wed, 4:30–5:20 p.m.",
+        "location": "Burnaby"
+      }
+    ]
+  },
+  {
+    "course_name": "Directed Studies in Actuarial Science [ACMA\n\t\t494\n\t\t\n\t\t\t(2)]",
+    "description": "Independent study and/or research in topics chosen in consultation with the supervising instructor. Prerequisite: Written permission from the Department of Statistics and Actuarial Science undergraduate curriculum committee.",
+    "sections": []
+  },
+  {
+    "course_name": "Job Practicum I [ACMA\n\t\t336\n\t\t\n\t\t\t(3)]",
+    "description": "First term of work experience in a co-operative education program for actuarial students. Students should contact an advisor as early in their career as possible for counseling. Units from this course do not count towards the units required for an SFU degree. Grading is on a pass/withdraw basis. A course fee is required. Prerequisite: Students must apply and receive permission from the co-op coordinator at least one but preferably two terms in advance. They will normally be required to have completed 45 units with a GPA of 2.50 before they may take this practicum course.",
+    "sections": [
+      {
+        "section": "D100",
+        "instructor": "Natalie Erickson",
+        "day/time": "",
+        "location": "TBD"
+      },
+      {
+        "section": "D200",
+        "instructor": "Natalie Erickson",
+        "day/time": "",
+        "location": "TBD"
+      },
+      {
+        "section": "I100",
+        "instructor": "Natalie Erickson",
+        "day/time": "",
+        "location": "TBD"
+      }
+    ]
+  },
+  {
+    "course_name": "Job Practicum III [ACMA\n\t\t436\n\t\t\n\t\t\t(3)]",
+    "description": "Third term of work experience in a co-operative education program available to actuarial students. Units from this course do not count towards the units required for an SFU degree. Grading is on a pass/withdraw basis. A course fee is required. Prerequisite: ACMA 337 or Job Practicum II from another department. Students must apply and receive permission from the co-op coordinator at least one term in advance.",
+    "sections": [
+      {
+        "section": "D100",
+        "instructor": "Natalie Erickson",
+        "day/time": "",
+        "location": "TBD"
+      },
+      {
+        "section": "D200",
+        "instructor": "Natalie Erickson",
+        "day/time": "",
+        "location": "TBD"
+      },
+      {
+        "section": "I100",
+        "instructor": "Natalie Erickson",
+        "day/time": "",
+        "location": "TBD"
+      }
+    ]
+  },
+  {
+    "course_name": "Job Practicum IV [ACMA\n\t\t437\n\t\t\n\t\t\t(3)]",
+    "description": "Fourth term of work experience in a co-operative education program available to actuarial students. Units from this course do not count towards the units required for an SFU degree. Grading is on a pass/withdraw basis. A course fee is required. Prerequisite: ACMA 436 or Job Practicum III from another department. Students must apply and receive permission from the co-op coordinator at least one term in advance.",
+    "sections": [
+      {
+        "section": "D100",
+        "instructor": "Natalie Erickson",
+        "day/time": "",
+        "location": "TBD"
+      },
+      {
+        "section": "D200",
+        "instructor": "Natalie Erickson",
+        "day/time": "",
+        "location": "TBD"
+      },
+      {
+        "section": "I100",
+        "instructor": "Natalie Erickson",
+        "day/time": "",
+        "location": "TBD"
+      }
+    ]
+  },
+  {
+    "course_name": "Special Topics in Actuarial Science [ACMA\n\t\t395\n\t\t\n\t\t\t(3)]",
+    "description": "Topics in areas of actuarial science not covered in the regular curriculum of the department. Prerequisite: Dependent on the topics covered.",
+    "sections": []
+  },
+  {
+    "course_name": "Directed Studies in Actuarial Science [ACMA\n\t\t495\n\t\t\n\t\t\t(3)]",
+    "description": "Independent study and/or research in topics chosen in consultation with the supervising instructor.  Prerequisite: Written permission from the Department of Statistics and Actuarial Science undergraduate curriculum committee.",
+    "sections": []
+  },
+  {
+    "course_name": "Theory of Pension [ACMA\n\t\t475\n\t\t\n\t\t\t(3)]",
+    "description": "Overview of pension plans: design, funding, regulation, accounting standards. Pension funding methods: actuarial cost methods, terminal funding method. Individual actuarial cost methods: accrual benefit cost method, entry-age actuarial cost method, unit-credit method, individual-level-premium method, attainted-age-normal method. Group actuarial cost methods. Prerequisite: ACMA 301 (or 320), with a minimum grade of C. Corequisite: ACMA 401. Quantitative.",
+    "sections": []
   }
 ]

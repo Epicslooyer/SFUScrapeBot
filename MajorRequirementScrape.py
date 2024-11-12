@@ -39,7 +39,6 @@ def main():
             logging.info(f'Processing department: {department_name}')
             data[department_name] = {}
 
-            # Fetch courses
             courses_url = f'{BASE_URL}?{API_PARAMS["year"]}/{API_PARAMS["term"]}/{department_name}'
             courses = fetch_json(courses_url)
 
