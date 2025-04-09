@@ -1,6 +1,6 @@
 # SFU Course Information Discord Bot
 
-**Note: this branch has been archived**
+**Note: this branch has been archived, refer to deployment**
 
 A comprehensive Discord bot that provides detailed information about Simon Fraser University courses, including course descriptions, professor ratings, and section details.
 
